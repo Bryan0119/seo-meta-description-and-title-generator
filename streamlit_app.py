@@ -53,10 +53,10 @@ def crawl_and_analyze_website(website_url, api_key):
 st.title('SEO Meta Description and Title Generator')
 
 st.markdown("""
-## Descrizione
+#### Descrizione
 Questo strumento Streamlit è progettato per automatizzare la generazione di meta descrizioni e titoli SEO-friendly per le pagine del sito web. Utilizzando l'API GPT-3.5 di OpenAI, fornisce un processo semplificato per creare meta tag concisi, accattivanti e pertinenti. Lo strumento è particolarmente utile per i professionisti SEO e gli amministratori di siti web che desiderano ottimizzare la visibilità del loro sito sui motori di ricerca senza l'ingente sforzo manuale tipicamente coinvolto nella creazione di informazioni meta.
 
-## Come funziona
+#### Come funziona
 1. **Ottieni una chiave API da OpenAI**: Visita [OpenAI API](https://platform.openai.com/api-keys) e segui le istruzioni per registrarti e ottenere la tua chiave API. Questa chiave ti permetterà di utilizzare l'API di GPT-3.5 per generare contenuti.
 2. **Prepara l'URL del tuo sito web**: Assicurati di avere l'URL delle pagine del sito per le quali desideri generare nuove meta descrizioni e titoli.
 3. **Inserisci la chiave API e l'URL nel tool**: Utilizza l'interfaccia utente Streamlit dell'applicazione per inserire la tua chiave API di OpenAI e l'URL del sito web.
