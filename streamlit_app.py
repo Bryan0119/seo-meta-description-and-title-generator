@@ -62,6 +62,7 @@ Questo strumento Streamlit è progettato per automatizzare la generazione di met
 3. Inserisci la chiave API e l'URL nel tool: Utilizza l'interfaccia utente Streamlit dell'applicazione per inserire la tua chiave API di OpenAI e l'URL del sito web.
 """)
 
+st.markdown("---")
 
 openai_api_key = st.text_input("Inserisci la tua chiave API di OpenAI:", type="password")
 
