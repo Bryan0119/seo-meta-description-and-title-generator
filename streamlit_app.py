@@ -54,7 +54,7 @@ st.title('SEO Meta Description and Title Generator')
 
 openai_api_key = st.text_input("Inserisci la tua chiave API di OpenAI:", type="password")
 
-website_url = st.text_input('Enter the website URL to crawl and analyze:', '')
+website_url = st.text_input('Inserire l'URL del sito web da scansionare ed analizzare:', '')
 
 if st.button('Analyze Website') and openai_api_key and website_url:
     with st.spinner('Crawling and analyzing website...'):
