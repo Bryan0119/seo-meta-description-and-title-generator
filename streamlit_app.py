@@ -52,7 +52,7 @@ def crawl_and_analyze_website(website_url, api_key):
 # Interfaccia utente Streamlit
 st.title('SEO Meta Description and Title Generator')
 
-openai_api_key = st.text_input("Inserisci la tua chiave API di OpenAI.:", type="password")
+openai_api_key = st.text_input("Inserisci la tua chiave API di OpenAI:", type="password")
 
 website_url = st.text_input('Inserire il dominio da scansionare ed analizzare:', '')
 
