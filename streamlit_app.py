@@ -3,8 +3,6 @@ import advertools as adv
 import pandas as pd
 import openai
 
-client = OpenAI()
-
 def get_seo_suggestions(row, api_key):
     openai.api_key = api_key
     
