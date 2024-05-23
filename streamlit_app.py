@@ -50,7 +50,7 @@ def crawl_and_analyze_website(website_url, api_key):
     return crawl_df[['title', 'new_title', 'url', 'meta_desc', 'new_meta_desc']]
 
 # Interfaccia utente Streamlit
-st.title('Generatore di Meta Descrizioni e Titoli SEO')
+st.title('SEO Meta Description and Title Generator')
 
 st.markdown("""
 #### Descrizione
