@@ -1,7 +1,8 @@
 import streamlit as st
 import advertools as adv
 import pandas as pd
-import openai
+from openai import OpenAI
+client = OpenAI()
 
 def get_seo_suggestions(row, api_key):
     openai.api_key = api_key
@@ -15,7 +16,7 @@ def get_seo_suggestions(row, api_key):
         f"Make sure to include the website's name and a call to action."
     )
     
-    response_desc = openai.Completion.create(
+    response_desc = client.chat.completions.create(
         model="gpt-3.5-turbo-instruct",
         prompt=prompt_desc,
         max_tokens=150
@@ -29,7 +30,7 @@ def get_seo_suggestions(row, api_key):
         f"concise, and includes keywords relevant to the website's content."
     )
     
-    response_title = openai.Completion.create(
+    response_title = client.chat.completions.create(
         model="gpt-3.5-turbo-instruct",
         prompt=prompt_title,
         max_tokens=60
