@@ -8,11 +8,11 @@ def get_seo_suggestions(row, api_key):
     
     # Generazione della nuova descrizione
     prompt_desc = (
-        f"I need help writing a meta description for a website. Your role is SEO agent. The title of the website is '{row['title']}'. "
-        f"The URL of the website is '{row['url']}'. "
-        f"The existing meta description is '{row['meta_desc']}'. "
-        f"Please write a new meta description that is more concise, compelling, and relevant to the website's content. "
-        f"Make sure to include the website's name and a call to action."
+        f"Ho bisogno di aiuto per scrivere una meta descrizione per un sito web. Il tuo ruolo è quello di agente SEO. Il titolo del sito web è '{row['title']}'. "
+        f"L'URL del sito web è '{row['url']}'. "
+        f"La descrizione meta esistente è '{row['meta_desc']}'. "
+        f"Per favore scrivi una nuova meta descrizione che sia più concisa, accattivante e pertinente al contenuto del sito web. "
+        f"Assicurati di includere il nome del sito web e una call to action."
     )
     
     response_desc = openai.Completion.create(
@@ -24,9 +24,9 @@ def get_seo_suggestions(row, api_key):
     
     # Generazione del nuovo titolo
     prompt_title = (
-        f"I need help writing a new title for a website. Your role is SEO agent. The current title is '{row['title']}'. "
-        f"The URL of the website is '{row['url']}'. Please write a new title that is catchy, "
-        f"concise, and includes keywords relevant to the website's content."
+        f"Ho bisogno di aiuto per scrivere un nuovo titolo per un sito web. Il tuo ruolo è quello di agente SEO. Il titolo attuale è '{row['title']}'. "
+        f"L'URL del sito web è '{row['url']}'. Per favore scrivi un nuovo titolo che sia accattivante, "
+        f"conciso e includa parole chiave pertinenti al contenuto del sito web."
     )
     
     response_title = openai.Completion.create(
@@ -50,7 +50,7 @@ def crawl_and_analyze_website(website_url, api_key):
     return crawl_df[['title', 'new_title', 'url', 'meta_desc', 'new_meta_desc']]
 
 # Interfaccia utente Streamlit
-st.title('SEO Meta Description and Title Generator')
+st.title('Generatore di Meta Descrizioni e Titoli SEO')
 
 st.markdown("""
 #### Descrizione
@@ -68,8 +68,8 @@ openai_api_key = st.text_input("Inserisci la tua chiave API di OpenAI:", type="p
 
 website_url = st.text_input('Inserire il dominio da scansionare ed analizzare:', '')
 
-if st.button('Analyze Website') and openai_api_key and website_url:
-    with st.spinner('Crawling and analyzing website...'):
+if st.button('Analizza il Sito Web') and openai_api_key and website_url:
+    with st.spinner('Scansione e analisi del sito web in corso...'):
         results_df = crawl_and_analyze_website(website_url, openai_api_key)
         st.dataframe(results_df)
         
