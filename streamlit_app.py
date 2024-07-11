@@ -5,7 +5,7 @@ from openai import OpenAI
 import json
 
 def get_seo_suggestions(row, client):
-    system_message = "You are an expert SEO consultant tasked with improving website meta descriptions and titles."
+    system_message = "You are an expert SEO consultant tasked with improving website meta descriptions and titles. Always respond with valid JSON."
     
     prompt_desc = f"""
     Create an optimized meta description for a webpage.
@@ -21,7 +21,8 @@ def get_seo_suggestions(row, client):
     4. Be concise, engaging, and relevant to the page content
     5. Include important keywords if possible
     
-    Respond with a JSON object containing only the new meta description.
+    Respond with a JSON object in the following format:
+    {{"meta_description": "Your optimized meta description here"}}
     """
     
     prompt_title = f"""
@@ -36,7 +37,8 @@ def get_seo_suggestions(row, client):
     3. Be engaging and descriptive
     4. Include important keywords if possible
     
-    Respond with a JSON object containing only the new title.
+    Respond with a JSON object in the following format:
+    {{"title": "Your optimized title here"}}
     """
     
     try:
@@ -47,8 +49,7 @@ def get_seo_suggestions(row, client):
                 {"role": "user", "content": prompt_desc}
             ],
             temperature=0.7,
-            response_format={"type": "json_object"},
-            max_tokens=100
+            max_tokens=150
         )
         new_desc = json.loads(response_desc.choices[0].message.content)["meta_description"]
         
@@ -59,8 +60,7 @@ def get_seo_suggestions(row, client):
                 {"role": "user", "content": prompt_title}
             ],
             temperature=0.7,
-            response_format={"type": "json_object"},
-            max_tokens=50
+            max_tokens=100
         )
         new_title = json.loads(response_title.choices[0].message.content)["title"]
         
