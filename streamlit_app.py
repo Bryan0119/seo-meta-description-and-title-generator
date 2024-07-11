@@ -54,7 +54,7 @@ def get_seo_suggestions(row, client):
         new_desc = json.loads(response_desc.choices[0].message.content)["meta_description"]
         
         response_title = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": prompt_title}
