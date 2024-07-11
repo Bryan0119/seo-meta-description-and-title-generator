@@ -1,136 +1,87 @@
 import streamlit as st
 import advertools as adv
 import pandas as pd
-from openai import OpenAI
-import json
+import openai
 
-def get_seo_suggestions(row, client):
-    system_message = "You are an expert SEO consultant tasked with improving website meta descriptions and titles. Always respond with valid JSON."
+def get_seo_suggestions(row, api_key):
+    openai.api_key = api_key
     
-    prompt_desc = f"""
-    Create an optimized meta description for a webpage.
+    # Generazione della nuova descrizione
+    prompt_desc = (
+        f"Ho bisogno di aiuto per scrivere una meta descrizione per un sito web. Il tuo ruolo è quello di agente SEO. Il titolo del sito web è '{row['title']}'. "
+        f"L'URL del sito web è '{row['url']}'. "
+        f"La descrizione meta esistente è '{row['meta_desc']}'. "
+        f"Per favore scrivi una nuova meta descrizione che sia più concisa, accattivante e pertinente al contenuto del sito web. "
+        f"Assicurati di includere il nome del sito web e una call to action."
+    )
     
-    Webpage Title: {row['title']}
-    URL: {row['url']}
-    Current Meta Description: {row['meta_desc']}
+    response_desc = openai.Completion.create(
+        model="gpt-3.5-turbo-instruct",
+        prompt=prompt_desc,
+        max_tokens=150
+    )
+    new_desc = response_desc.choices[0].text.strip()
     
-    Requirements:
-    1. Maximum 155 characters
-    2. Include the website name
-    3. Include a clear call-to-action
-    4. Be concise, engaging, and relevant to the page content
-    5. Include important keywords if possible
+    # Generazione del nuovo titolo
+    prompt_title = (
+        f"Ho bisogno di aiuto per scrivere un nuovo titolo per un sito web. Il tuo ruolo è quello di agente SEO. Il titolo attuale è '{row['title']}'. "
+        f"L'URL del sito web è '{row['url']}'. Per favore scrivi un nuovo titolo che sia accattivante, "
+        f"conciso e includa parole chiave pertinenti al contenuto del sito web."
+    )
     
-    Respond with a JSON object in the following format:
-    {{"meta_description": "Your optimized meta description here"}}
-    """
+    response_title = openai.Completion.create(
+        model="gpt-3.5-turbo-instruct",
+        prompt=prompt_title,
+        max_tokens=60
+    )
+    new_title = response_title.choices[0].text.strip()
     
-    prompt_title = f"""
-    Create an optimized page title for a webpage.
-    
-    Current Title: {row['title']}
-    URL: {row['url']}
-    
-    Requirements:
-    1. Maximum 60 characters
-    2. Include the website name
-    3. Be engaging and descriptive
-    4. Include important keywords if possible
-    
-    Respond with a JSON object in the following format:
-    {{"title": "Your optimized title here"}}
-    """
-    
-    try:
-        response_desc = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": prompt_desc}
-            ],
-            temperature=0.7,
-            max_tokens=150
-        )
-        new_desc = json.loads(response_desc.choices[0].message.content)["meta_description"]
-        
-        response_title = client.chat.completions.create(
-            model="gpt-4-turbo",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": prompt_title}
-            ],
-            temperature=0.7,
-            max_tokens=100
-        )
-        new_title = json.loads(response_title.choices[0].message.content)["title"]
-        
-        return new_desc, new_title
-    except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-        return None, None
+    return new_desc, new_title
 
-def crawl_and_analyze_website(website_url, client):
+def crawl_and_analyze_website(website_url, api_key):
     output_file = 'website_crawl.jl'
     adv.crawl(website_url, output_file, follow_links=True)
     crawl_df = pd.read_json(output_file, lines=True)
     crawl_df = crawl_df.drop_duplicates('url', keep='last').reset_index(drop=True)
     crawl_df = crawl_df.dropna(subset=['title', 'meta_desc'])
     
-    results = []
-    for _, row in crawl_df.iterrows():
-        new_desc, new_title = get_seo_suggestions(row, client)
-        if new_desc and new_title:
-            results.append({
-                'url': row['url'],
-                'current_title': row['title'],
-                'new_title': new_title,
-                'current_meta_desc': row['meta_desc'],
-                'new_meta_desc': new_desc
-            })
-    
-    return pd.DataFrame(results)
+    # Applica la funzione per generare nuove descrizioni e titoli
+    crawl_df[['new_meta_desc', 'new_title']] = crawl_df.apply(lambda row: get_seo_suggestions(row, api_key), axis=1, result_type='expand')
+    return crawl_df[['title', 'new_title', 'url', 'meta_desc', 'new_meta_desc']]
 
-st.title('Advanced SEO Meta Description and Title Generator (GPT-4)')
+# Interfaccia utente Streamlit
+st.title('SEO Meta Description and Title Generator')
 
 st.markdown("""
-#### Description
-This Streamlit tool automates the generation of SEO-friendly meta descriptions and titles for web pages. 
-It uses OpenAI's GPT-4 API to provide high-quality, context-aware suggestions tailored to your website content.
+#### Descrizione
+Questo strumento Streamlit è progettato per automatizzare la generazione di meta descrizioni e titoli SEO-friendly per le pagine del sito web. Utilizzando l'API GPT-3.5 di OpenAI, fornisce un processo semplificato per creare meta tag concisi, accattivanti e pertinenti. Lo strumento è particolarmente utile per i professionisti SEO e gli amministratori di siti web che desiderano ottimizzare la visibilità del loro sito sui motori di ricerca senza l'ingente sforzo manuale tipicamente coinvolto nella creazione di informazioni meta.
 
-#### How it works
-1. **Enter your OpenAI API Key**: You'll need a valid API key from OpenAI with access to GPT-4.
-2. **Enter your website URL**: Provide the URL of the site you want to analyze.
-3. **Run the analysis**: The tool will crawl your site, analyze the content, and generate optimized meta descriptions and titles.
-4. **Review and download results**: You can view the suggestions directly in the app and download them as a CSV file.
-
-#### Note
-This tool uses GPT-4, which may incur higher costs than GPT-3.5-turbo. Please be aware of your API usage and associated costs.
+#### Come funziona
+1. **Ottieni una chiave API da OpenAI**: Visita [OpenAI API](https://platform.openai.com/api-keys) e segui le istruzioni per registrarti e ottenere la tua chiave API. Questa chiave ti permetterà di utilizzare l'API di GPT-3.5 per generare contenuti.
+2. **Prepara l'URL del tuo sito web**: Assicurati di avere l'URL delle pagine del sito per le quali desideri generare nuove meta descrizioni e titoli.
+3. **Inserisci la chiave API e l'URL nel tool**: Utilizza l'interfaccia utente Streamlit dell'applicazione per inserire la tua chiave API di OpenAI e l'URL del sito web.
 """)
 
 st.markdown("---")
 
-openai_api_key = st.text_input("Enter your OpenAI API Key:", type="password")
-website_url = st.text_input('Enter the domain to scan and analyze:', '')
+openai_api_key = st.text_input("Inserisci la tua chiave API di OpenAI:", type="password")
 
-if st.button('Analyze Website') and openai_api_key and website_url:
-    client = OpenAI(api_key=openai_api_key)
-    with st.spinner('Scanning and analyzing the website... This may take a few minutes.'):
-        try:
-            results_df = crawl_and_analyze_website(website_url, client)
-            st.success("Analysis complete!")
-            st.dataframe(results_df)
-            
-            csv = results_df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="Download results as CSV",
-                data=csv,
-                file_name="seo_results.csv",
-                mime="text/csv",
-            )
-        except Exception as e:
-            st.error(f"An error occurred during analysis: {str(e)}")
+website_url = st.text_input('Inserire il dominio da scansionare ed analizzare:', '')
+
+if st.button('Analizza il Sito Web') and openai_api_key and website_url:
+    with st.spinner('Scansione e analisi del sito web in corso...'):
+        results_df = crawl_and_analyze_website(website_url, openai_api_key)
+        st.dataframe(results_df)
+        
+        # Converti il DataFrame in una stringa CSV
+        csv = results_df.to_csv(index=False).encode('utf-8')
+        
+        # Crea un pulsante di download per il CSV
+        st.download_button(
+            label="Scarica i risultati come CSV",
+            data=csv,
+            file_name="risultati_seo.csv",
+            mime="text/csv",
+        )
 else:
-    st.warning('Please enter both an OpenAI API Key and a valid website URL to proceed.')
-
-st.markdown("---")
-st.markdown("Built with ❤️ using OpenAI's GPT-4 and Streamlit")
+    st.error('Inserire una chiave API OpenAI e un URL valido del sito web.')
